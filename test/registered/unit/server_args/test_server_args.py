@@ -3290,6 +3290,12 @@ class TestNgramExternalSamArgs(CustomTestCase):
             handle_speculative_decoding(args)
         self.assertIn("external-corpus-max-tokens", str(context.exception))
 
+    def test_rejects_deterministic_inference(self):
+        """NGRAM output depends on earlier requests, so deterministic mode must refuse it."""
+        args = self._make_dummy_ngram_args(enable_deterministic_inference=True)
+        with self.assertRaisesRegex(ValueError, "enable-deterministic-inference"):
+            handle_speculative_decoding(args)
+
 
 class TestDecoupledSpecArgs(CustomTestCase):
     """Decoupled speculative-decoding CLI flags.

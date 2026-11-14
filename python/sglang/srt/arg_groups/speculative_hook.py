@@ -1466,6 +1466,15 @@ def _handle_ngram(server_args: ServerArgs) -> None:
         raise ValueError(
             "Ngram speculative decoding only supports CUDA, CPU, or XPU devices."
         )
+    if cfg.enable_deterministic_inference:
+        # Drafts come from a corpus shared across requests, so the verify tree and
+        # its output bits depend on earlier traffic (sgl-project/sglang#50395).
+        raise ValueError(
+            "Ngram speculative decoding does not support "
+            "--enable-deterministic-inference: its drafts depend on earlier "
+            "requests, so outputs are not reproducible. Disable speculative "
+            "decoding or use EAGLE/EAGLE3 instead."
+        )
 
     _disable_overlap_schedule_for_cpu(server_args)
 
