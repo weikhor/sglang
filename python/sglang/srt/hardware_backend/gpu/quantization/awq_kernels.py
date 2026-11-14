@@ -9,6 +9,7 @@ from sglang.srt.layers.moe.moe_runner.marlin import MarlinMoeQuantInfo
 from sglang.srt.layers.quantization.marlin_utils import (
     apply_awq_marlin_linear,
     awq_to_marlin_zero_points,
+    mark_marlin_repacked_layer,
     marlin_make_empty_g_idx,
     marlin_make_workspace,
     marlin_moe_permute_scales,
@@ -140,6 +141,7 @@ class AWQMarlinLinearKernel:
 
         layer.g_idx = marlin_make_empty_g_idx(device)
         layer.g_idx_sort_indices = marlin_make_empty_g_idx(device)
+        mark_marlin_repacked_layer(layer)
 
     def apply(
         self,

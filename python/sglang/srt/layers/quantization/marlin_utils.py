@@ -266,6 +266,20 @@ def check_moe_marlin_supports_layer(
     )
 
 
+def mark_marlin_repacked_layer(layer: torch.nn.Module) -> None:
+    """Refuse online weight updates on a dense layer repacked for Marlin.
+
+    The repack replaces or deletes the checkpoint-format parameters and has no
+    restore hook, so a reload would write into tensors the loader cannot match.
+    """
+    layer._derived_weight_cache_error = (
+        "Online weight updates are not supported for dense layers repacked "
+        "for the Marlin kernel (GPTQ, AWQ, compressed-tensors W4A16, or FP8 "
+        "on GPUs without native FP8): the repack replaces the checkpoint "
+        "weights and cannot be restored."
+    )
+
+
 def marlin_make_workspace(
     device: torch.device, max_blocks_per_sm: int = 1
 ) -> torch.Tensor:

@@ -7,6 +7,7 @@ import torch
 
 from sglang.srt.layers.quantization.marlin_utils import (
     USE_FP32_REDUCE_DEFAULT,
+    mark_marlin_repacked_layer,
     marlin_make_workspace,
     marlin_permute_scales,
     should_use_atomic_add_reduce,
@@ -191,6 +192,8 @@ def prepare_fp8_layer_for_marlin(
     if hasattr(layer, "bias") and layer.bias is not None:
         assert layer.bias.shape == (part_size_n,)
         layer.bias = torch.nn.Parameter(layer.bias.detach(), requires_grad=False)
+
+    mark_marlin_repacked_layer(layer)
 
 
 def pack_fp8_to_int32(

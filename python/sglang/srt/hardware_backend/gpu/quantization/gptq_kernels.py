@@ -11,6 +11,7 @@ from sglang.srt.layers.parameter import BasevLLMParameter, permute_param_layout_
 from sglang.srt.layers.quantization.marlin_utils import (
     apply_gptq_marlin_linear,
     check_marlin_supports_shape,
+    mark_marlin_repacked_layer,
     marlin_is_k_full,
     marlin_make_empty_g_idx,
     marlin_make_workspace,
@@ -174,6 +175,7 @@ class GPTQMarlinLinearKernel:
             setattr(layer, self.w_zp_name, marlin_make_empty_g_idx(device))
         _transform_param(layer, self.w_q_name, transform_w_q)
         _transform_param(layer, self.w_s_name, transform_w_s)
+        mark_marlin_repacked_layer(layer)
 
     def apply(
         self,
