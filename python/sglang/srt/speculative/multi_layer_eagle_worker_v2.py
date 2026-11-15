@@ -832,14 +832,14 @@ class MultiLayerEagleDraftWorker(EagleDraftWorkerBase):
             boundary_kv_locs, boundary_kv_positions = (
                 self._compute_boundary_kv_locs_positions(batch)
             )
-        boundary_kv_ready_event = None
-        if boundary_kv_locs is not None and self.plan_stream:
-            boundary_kv_ready_event = torch.get_device_module(self.device).Event()
-            boundary_kv_ready_event.record()
+        # Prep reads compute-stream outputs (next_token_ids, accept_lens, boundary
+        # KV locs), so the plan stream must wait even when there is no boundary.
+        if self.plan_stream:
+            self.plan_stream.wait_stream(
+                torch.get_device_module(self.device).current_stream()
+            )
 
         with self.plan_stream_ctx:
-            if boundary_kv_ready_event is not None:
-                self.plan_stream.wait_event(boundary_kv_ready_event)
             forward_batch = prepare_for_draft_extend(
                 draft_extend_input,
                 batch,
